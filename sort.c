@@ -17,7 +17,7 @@ void bubble(int *a, int n, long long *swaps) {
     }
 }
 
-void insert(int *a, int n, long long *swaps) {
+void insertion(int *a, int n, long long *swaps) {
     *swaps = 0;
     for (int i = 1; i < n; i++) {
         int key = a[i];
@@ -31,37 +31,31 @@ void insert(int *a, int n, long long *swaps) {
     }
 }
 
-void merge(int *a, int l, int m, int r, long long *swaps) {
-    int n1 = m - l + 1;
-    int n2 = r - m;
-    int *L = (int*)malloc(n1 * sizeof(int));
-    int *R = (int*)malloc(n2 * sizeof(int));
+int partition(int *a, int low, int high, long long *swaps) {
+    int pivot = a[high];
+    int i = (low - 1);
 
-    for (int i = 0; i < n1; i++) L[i] = a[l + i];
-    for (int j = 0; j < n2; j++) R[j] = a[m + 1 + j];
-
-    int i = 0, j = 0, k = l;
-    while (i < n1 && j < n2) {
-        if (L[i] <= R[j]) {
-            a[k++] = L[i++];
-        } else {
-            a[k++] = R[j++];
+    for (int j = low; j < high; j++) {
+        if (a[j] < pivot) {
+            i++;
+            int t = a[i];
+            a[i] = a[j];
+            a[j] = t;
+            (*swaps)++;
         }
-        (*swaps)++;
     }
-    while (i < n1) { a[k++] = L[i++]; (*swaps)++; }
-    while (j < n2) { a[k++] = R[j++]; (*swaps)++; }
-
-    free(L);
-    free(R);
+    int t = a[i + 1];
+    a[i + 1] = a[high];
+    a[high] = t;
+    (*swaps)++;
+    return (i + 1);
 }
 
-void mergeSort(int *a, int l, int r, long long *swaps) {
-    if (l < r) {
-        int m = l + (r - l) / 2;
-        mergeSort(a, l, m, swaps);
-        mergeSort(a, m + 1, r, swaps);
-        merge(a, l, m, r, swaps);
+void quickSort(int *a, int low, int high, long long *swaps) {
+    if (low < high) {
+        int pi = partition(a, low, high, swaps);
+        quickSort(a, low, pi - 1, swaps);
+        quickSort(a, pi + 1, high, swaps);
     }
 }
 
@@ -82,15 +76,15 @@ int main() {
     int sizes[] = {10, 1000, 10000, 100000};
     int tests = 4;
 
-    printf("%-10s | %-20s | %-20s | %-20s\n", "N", "Bubble (sec)", "Insert (sec)", "Merge (sec)");
+    printf("%-10s | %-20s | %-20s | %-20s\n", "N", "Bubble (sec)", "Insert (sec)", "Quick (sec)");
     printf("--------------------------------------------------------------------------------\n");
 
     for (int i = 0; i < tests; i++) {
         int n = sizes[i];
         int *orig = gen(n);
         int *wrk;
-        long long s_bub = 0, s_ins = 0, s_mrg = 0;
-        double t_bub = 0, t_ins = 0, t_mrg = 0;
+        long long s_bub = 0, s_ins = 0, s_qs = 0;
+        double t_bub = 0, t_ins = 0, t_qs = 0;
         clock_t start, end;
 
         wrk = dup(orig, n);
@@ -102,20 +96,19 @@ int main() {
 
         wrk = dup(orig, n);
         start = clock();
-        insert(wrk, n, &s_ins);
+        insertion(wrk, n, &s_ins);
         end = clock();
         t_ins = (double)(end - start) / CLOCKS_PER_SEC;
         free(wrk);
 
         wrk = dup(orig, n);
         start = clock();
-        mergeSort(wrk, 0, n - 1, &s_mrg);
+        quickSort(wrk, 0, n - 1, &s_qs);
         end = clock();
-        t_mrg = (double)(end - start) / CLOCKS_PER_SEC;
+        t_qs = (double)(end - start) / CLOCKS_PER_SEC;
         free(wrk);
 
-        printf("%-10d | %-20f | %-20f | %-20f\n", n, t_bub, t_ins, t_mrg);
-        
+        printf("%-10d | %-20f | %-20f | %-20f\n", n, t_bub, t_ins, t_qs);
         free(orig);
     }
     return 0;
