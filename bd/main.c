@@ -13,7 +13,7 @@ void printMenu() {
     printf("7. Сохранить изменения\n");
     printf("0. Выход\n");
     printf("Введите номер: ");
-    fflush(stdout); // Принудительный вывод перед scanf
+    fflush(stdout);
 }
 
 int main() {
@@ -29,7 +29,6 @@ int main() {
             while(getchar() != '\n'); 
             choice = -1;
         }
-        // fflush(stdout) внутри printMenu уже гарантирует, что "Введите номер: " отобразится.
 
         switch (choice) {
             case 1: printDB(&db); break;
