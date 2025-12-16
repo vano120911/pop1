@@ -1,7 +1,5 @@
 #include "bakery.h"
 
-#define DB_FILE "bakery_data.bin"
-
 void printMenu() {
     printf("\n=== Меню ===\n");
     printf("1. Вывести товары на экран\n");
@@ -20,13 +18,24 @@ int main() {
     BakeryDB db;
     initDB(&db);
 
-    loadDB(&db, DB_FILE);
+    char filename[100];
+
+    printf("Введите имя файла базы данных: ");
+    fflush(stdout);
+
+    if (scanf("%99s", filename) != 1) {
+        printf("Ошибка ввода.\n");
+        freeDB(&db);
+        return 1;
+    }
+
+    loadDB(&db, filename);
 
     int choice;
     do {
         printMenu();
         if (scanf("%d", &choice) != 1) {
-            while(getchar() != '\n'); 
+            while(getchar() != '\n');
             choice = -1;
         }
 
@@ -37,13 +46,13 @@ int main() {
             case 4: addPastry(&db); break;
             case 5: editPastry(&db); break;
             case 6: deletePastry(&db); break;
-            case 7: saveDB(&db, DB_FILE); break;
-            case 0: 
-                saveDB(&db, DB_FILE); 
+            case 7: saveDB(&db, filename); break;
+            case 0:
+                saveDB(&db, filename);
                 printf("Выход...\n");
                 fflush(stdout);
                 break;
-            default: 
+            default:
                 printf("Неверный ввод.\n");
                 fflush(stdout);
         }
